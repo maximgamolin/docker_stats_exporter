@@ -43,42 +43,42 @@ if (!docker) {
 const gaugeCpuUsageRatio = new prom.Gauge({
     'name': appName + '_cpu_usage_ratio',
     'help': 'CPU usage percentage 0-100',
-    'labelNames': ['name', 'id'],
+    'labelNames': ['name', 'id', 'image'],
 });
 const gaugeMemoryUsageBytes = new prom.Gauge({
     'name': appName + '_memory_usage_bytes',
     'help': 'Memory usage in bytes',
-    'labelNames': ['name', 'id'],
+    'labelNames': ['name', 'id', 'image'],
 });
 const gaugeMemoryLimitBytes = new prom.Gauge({
     'name': appName + '_memory_limit_bytes',
     'help': 'Memory limit in bytes',
-    'labelNames': ['name', 'id'],
+    'labelNames': ['name', 'id', 'image'],
 });
 const gaugeMemoryUsageRatio = new prom.Gauge({
     'name': appName + '_memory_usage_ratio',
     'help': 'Memory usage percentage 0-100',
-    'labelNames': ['name', 'id'],
+    'labelNames': ['name', 'id', 'image'],
 });
 const gaugeNetworkReceivedBytes = new prom.Gauge({
     'name': appName + '_network_received_bytes',
     'help': 'Network received in bytes',
-    'labelNames': ['name', 'id'],
+    'labelNames': ['name', 'id', 'image'],
 });
 const gaugeNetworkTransmittedBytes = new prom.Gauge({
     'name': appName + '_network_transmitted_bytes',
     'help': 'Network transmitted in bytes',
-    'labelNames': ['name', 'id'],
+    'labelNames': ['name', 'id', 'image'],
 });
 const gaugeBlockIoReadBytes = new prom.Gauge({
     'name': appName + '_blockio_read_bytes',
     'help': 'Block IO read in bytes',
-    'labelNames': ['name', 'id'],
+    'labelNames': ['name', 'id', 'image'],
 });
 const gaugeBlockIoWrittenBytes = new prom.Gauge({
     'name': appName + '_blockio_written_bytes',
     'help': 'Block IO written in bytes',
-    'labelNames': ['name', 'id'],
+    'labelNames': ['name', 'id', 'image'],
 });
 
 // Register all metrics
@@ -130,6 +130,7 @@ async function gatherMetrics() {
         // Get stats for each container in one go
         let promises = [];
         for (let container of containers) {
+            //console.log(container.Image.toString())
             if (container.Id) {
                 promises.push(docker.getContainer(container.Id).stats({ 'stream': false, 'decode': true }));
             }
@@ -141,9 +142,11 @@ async function gatherMetrics() {
 
         // Build metrics for each container
         for (let result of results) {
+            let containerData= await docker.getContainer(result['id']).inspect()
             const labels = {
                 'name': result['name'].replace('/', ''),
                 'id': result['id'].slice(0, 12),
+                'image': containerData.Config.Image
             };
 
             // CPU
