@@ -26,6 +26,7 @@ The arguments can also be set as env variables instead. Useful if you're using i
 3. DOCKERSTATS_HOSTIP
 4. DOCKERSTATS_HOSTPORT
 5. DOCKERSTATS_DEFAULTMETRICS
+6. DOCKERSTATS_MACHINE_NAME - unique name for runner
 
 # Installation
 

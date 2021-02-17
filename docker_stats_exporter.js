@@ -17,7 +17,9 @@ const argOptions = commandLineArgs([
     { name: 'hostip', type: String, defaultValue: process.env.DOCKERSTATS_HOSTIP || '', },
     { name: 'hostport', type: Number, defaultValue: process.env.DOCKERSTATS_HOSTPORT || 0, },
     { name: 'collectdefault', type: Boolean, },
+    { name: 'machineName', type: String, defaultValue: process.env.DOCKERSTATS_MACHINE_NAME || 'dockerstatshost'}
 ]);
+const machineName = argOptions.machineName;
 const port = argOptions.port;
 const interval = argOptions.interval >= 3 ? argOptions.interval : 3;
 const dockerIP = argOptions.hostip;
@@ -43,42 +45,42 @@ if (!docker) {
 const gaugeCpuUsageRatio = new prom.Gauge({
     'name': appName + '_cpu_usage_ratio',
     'help': 'CPU usage percentage 0-100',
-    'labelNames': ['name', 'id', 'image'],
+    'labelNames': ['name', 'id', 'image', 'machineName'],
 });
 const gaugeMemoryUsageBytes = new prom.Gauge({
     'name': appName + '_memory_usage_bytes',
     'help': 'Memory usage in bytes',
-    'labelNames': ['name', 'id', 'image'],
+    'labelNames': ['name', 'id', 'image', 'machineName'],
 });
 const gaugeMemoryLimitBytes = new prom.Gauge({
     'name': appName + '_memory_limit_bytes',
     'help': 'Memory limit in bytes',
-    'labelNames': ['name', 'id', 'image'],
+    'labelNames': ['name', 'id', 'image', 'machineName'],
 });
 const gaugeMemoryUsageRatio = new prom.Gauge({
     'name': appName + '_memory_usage_ratio',
     'help': 'Memory usage percentage 0-100',
-    'labelNames': ['name', 'id', 'image'],
+    'labelNames': ['name', 'id', 'image', 'machineName'],
 });
 const gaugeNetworkReceivedBytes = new prom.Gauge({
     'name': appName + '_network_received_bytes',
     'help': 'Network received in bytes',
-    'labelNames': ['name', 'id', 'image'],
+    'labelNames': ['name', 'id', 'image', 'machineName'],
 });
 const gaugeNetworkTransmittedBytes = new prom.Gauge({
     'name': appName + '_network_transmitted_bytes',
     'help': 'Network transmitted in bytes',
-    'labelNames': ['name', 'id', 'image'],
+    'labelNames': ['name', 'id', 'image', 'machineName'],
 });
 const gaugeBlockIoReadBytes = new prom.Gauge({
     'name': appName + '_blockio_read_bytes',
     'help': 'Block IO read in bytes',
-    'labelNames': ['name', 'id', 'image'],
+    'labelNames': ['name', 'id', 'image', 'machineName'],
 });
 const gaugeBlockIoWrittenBytes = new prom.Gauge({
     'name': appName + '_blockio_written_bytes',
     'help': 'Block IO written in bytes',
-    'labelNames': ['name', 'id', 'image'],
+    'labelNames': ['name', 'id', 'image', 'machineName'],
 });
 
 // Register all metrics
@@ -146,7 +148,8 @@ async function gatherMetrics() {
             const labels = {
                 'name': result['name'].replace('/', ''),
                 'id': result['id'].slice(0, 12),
-                'image': containerData.Config.Image
+                'image': containerData.Config.Image,
+                'machineName': machineName,
             };
 
             // CPU
